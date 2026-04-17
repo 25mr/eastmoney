@@ -273,7 +273,8 @@ def build_email_html(articles, now):
         body_rows = """
         <tr>
           <td class="content-cell"
-              style="padding:48px 28px;text-align:center;">
+              style="padding:48px 28px;text-align:center;
+                     word-break:break-word;overflow-wrap:break-word;">
             <p style="margin:0;font-size:17px;color:#64748b;line-height:1.8;">
               💤 No articles today.
             </p>
@@ -298,26 +299,39 @@ def build_email_html(articles, now):
             rows.append(
                 f"""
             <tr>
-              <td class="content-cell" style="padding:28px;{sep}">
+              <td class="content-cell"
+                  style="padding:28px;{sep}
+                         word-break:break-word;
+                         overflow-wrap:break-word;
+                         overflow:hidden;">
                 <h2 class="article-title"
                     style="margin:0 0 14px;font-size:18px;font-weight:700;
-                           color:#1e293b;line-height:1.5;">
+                           color:#1e293b;line-height:1.5;
+                           word-break:break-word;
+                           overflow-wrap:break-word;">
                   {safe_title}
                 </h2>
-                <p style="margin:0 0 4px;font-size:14px;color:#475569;line-height:1.6;">
+                <p style="margin:0 0 4px;font-size:14px;color:#475569;
+                          line-height:1.6;
+                          word-break:break-word;overflow-wrap:break-word;">
                   ✍️ {safe_authors}
                 </p>
-                <p style="margin:0 0 4px;font-size:14px;color:#475569;line-height:1.6;">
+                <p style="margin:0 0 4px;font-size:14px;color:#475569;
+                          line-height:1.6;
+                          word-break:break-word;overflow-wrap:break-word;">
                   🏛️ {safe_org}
                 </p>
-                <p style="margin:0 0 18px;font-size:14px;color:#475569;line-height:1.6;">
+                <p style="margin:0 0 18px;font-size:14px;color:#475569;
+                          line-height:1.6;">
                   📅 {safe_date}
                 </p>
                 <div class="article-content"
                      style="font-size:14px;color:#334155;line-height:1.9;
                             background:#f8fafc;border-radius:8px;
-                            padding:18px 20px;word-break:break-word;
-                            overflow-wrap:break-word;">
+                            padding:18px 20px;
+                            word-break:break-word;
+                            overflow-wrap:break-word;
+                            overflow:hidden;">
                   {safe_content}
                 </div>
               </td>
@@ -325,6 +339,9 @@ def build_email_html(articles, now):
             )
         body_rows = "".join(rows)
 
+    # ────────────────────────────────────────────
+    # 下面是修复后的 HTML 模板
+    # ────────────────────────────────────────────
     return f"""\
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -333,7 +350,6 @@ def build_email_html(articles, now):
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>策略研究</title>
 <style>
-  /* 全局 border-box，防止 padding 导致宽度溢出 */
   body, table, td, div, h1, h2, p {{
     box-sizing: border-box;
   }}
@@ -345,17 +361,20 @@ def build_email_html(articles, now):
     border-collapse:collapse;mso-table-lspace:0;mso-table-rspace:0;
   }}
   img {{border:0}}
-  /* 移动端适配：强制内容单元格占满宽度 */
+
   @media only screen and (max-width:620px) {{
     .main-table {{
       width:100% !important;
       min-width:0 !important;
-      table-layout: fixed !important;
+      max-width:100% !important;          /* ← FIX 4 */
+      table-layout:fixed !important;
     }}
     .content-cell {{
       padding:18px 14px !important;
       width:100% !important;
-      box-sizing: border-box !important;
+      max-width:100% !important;           /* ← FIX 4 */
+      box-sizing:border-box !important;
+      overflow:hidden !important;          /* ← FIX 2 */
     }}
     .article-title {{
       font-size:16px !important;
@@ -363,46 +382,69 @@ def build_email_html(articles, now):
     .article-content {{
       padding:14px !important;
       font-size:13px !important;
-      word-break: break-word !important;
+      word-break:break-word !important;
+      overflow:hidden !important;          /* ← FIX 2 */
     }}
   }}
 </style>
 </head>
-<body style="margin:0;padding:0;background:#f1f5f9;">
+
+<!-- FIX 2: overflow:hidden 防止 body 层面出现横向滚动 -->
+<body style="margin:0;padding:0;background:#f1f5f9;
+             overflow-x:hidden;">
+
+<!-- 外层包裹 div：双重保险，限制最大宽度 -->
+<div style="max-width:100%;overflow:hidden;margin:0;padding:0;">
+
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
-       style="background:#f1f5f9;">
-<tr><td align="center" style="padding:24px 10px;">
-<table class="main-table" role="presentation" width="600" cellpadding="0"
-       cellspacing="0"
-       style="max-width:600px;width:100%;border-radius:12px;overflow:hidden;
-              box-shadow:0 4px 6px -1px rgba(0,0,0,.1),0 2px 4px -1px rgba(0,0,0,.06);
-              background:#fff;table-layout:fixed;">
-  <!-- HEADER -->
-  <tr>
-    <td style="background:linear-gradient(135deg,#0F172A 0%,#1e293b 50%,#0F172A 100%);
-               padding:30px 28px;text-align:center;">
-      <h1 style="margin:0;font-size:30px;font-weight:700;color:#fff;letter-spacing:1px;">
-        🌿 策略研究
-      </h1>
-    </td>
-  </tr>
-  <!-- BODY -->
-  {body_rows}
-  <!-- FOOTER -->
-  <tr>
-    <td style="background:linear-gradient(135deg,#1e293b 0%,#0F172A 50%,#1e293b 100%);
-               padding:20px 28px;text-align:center;">
-      <p style="margin:0;font-size:12px;color:#94a3b8;">
-        Updated at {footer_time}
-      </p>
-    </td>
-  </tr>
+       style="background:#f1f5f9;table-layout:fixed;width:100%;">
+<tr>
+  <!-- FIX 2: overflow:hidden 在 td 上 -->
+  <td align="center" style="padding:24px 10px;overflow:hidden;">
+
+    <!--
+      FIX 1: 去掉 width="600" HTML 属性
+             只用 CSS 控制宽度，移动端媒体查询才能生效
+    -->
+    <table class="main-table" role="presentation"
+           cellpadding="0" cellspacing="0"
+           style="max-width:600px;width:100%;
+                  border-radius:12px;overflow:hidden;
+                  box-shadow:0 4px 6px -1px rgba(0,0,0,.1),
+                             0 2px 4px -1px rgba(0,0,0,.06);
+                  background:#fff;table-layout:fixed;">
+
+      <!-- HEADER -->
+      <tr>
+        <td style="background:linear-gradient(135deg,#0F172A 0%,#1e293b 50%,#0F172A 100%);
+                   padding:30px 28px;text-align:center;">
+          <h1 style="margin:0;font-size:30px;font-weight:700;
+                     color:#fff;letter-spacing:1px;">
+            🌿 策略研究
+          </h1>
+        </td>
+      </tr>
+
+      <!-- BODY -->
+      {body_rows}
+
+      <!-- FOOTER -->
+      <tr>
+        <td style="background:linear-gradient(135deg,#1e293b 0%,#0F172A 50%,#1e293b 100%);
+                   padding:20px 28px;text-align:center;">
+          <p style="margin:0;font-size:12px;color:#94a3b8;">
+            Updated at {footer_time}
+          </p>
+        </td>
+      </tr>
+    </table>
+
+  </td>
+</tr>
 </table>
-</td></tr>
-</table>
+</div>
 </body>
 </html>"""
-
 
 # ========== 3. 发送邮件 ==========
 async def send_email(subject, html_body):
