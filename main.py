@@ -266,7 +266,7 @@ async def fetch_articles():
 
 
 # ========== 2. 构建邮件 HTML ==========
-def build_email_html(articles, now: datetime) -> str:
+def build_email_html(articles, now):
     footer_time = now.strftime("%Y-%m-%d %H:%M UTC+8")
 
     if not articles:
@@ -337,7 +337,7 @@ def build_email_html(articles, now: datetime) -> str:
             )
         body_rows = "".join(rows)
 
-    email_html = f"""\
+    return f"""\
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
