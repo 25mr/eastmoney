@@ -317,8 +317,7 @@ def build_email_html(articles, now):
                      style="font-size:14px;color:#334155;line-height:1.9;
                             background:#f8fafc;border-radius:8px;
                             padding:18px 20px;word-break:break-word;
-                            overflow-wrap:break-word;
-                            max-height:500px;overflow-y:auto;">
+                            overflow-wrap:break-word;">
                   {safe_content}
                 </div>
               </td>
@@ -334,16 +333,38 @@ def build_email_html(articles, now):
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>策略研究</title>
 <style>
-  body{{margin:0;padding:0;width:100%;background:#f1f5f9;
-        -webkit-text-size-adjust:100%;-ms-text-size-adjust:100%}}
-  table{{border-collapse:collapse;mso-table-lspace:0;mso-table-rspace:0}}
-  img{{border:0}}
-  @media only screen and (max-width:620px){{
-    .main-table{{width:100%!important;min-width:0!important}}
-    .content-cell{{padding:18px 14px!important}}
-    .article-title{{font-size:16px!important}}
-    .article-content{{padding:14px!important;font-size:13px!important;
-                      max-height:none!important}}
+  /* 全局 border-box，防止 padding 导致宽度溢出 */
+  body, table, td, div, h1, h2, p {{
+    box-sizing: border-box;
+  }}
+  body {{
+    margin:0;padding:0;width:100%;background:#f1f5f9;
+    -webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;
+  }}
+  table {{
+    border-collapse:collapse;mso-table-lspace:0;mso-table-rspace:0;
+  }}
+  img {{border:0}}
+  /* 移动端适配：强制内容单元格占满宽度 */
+  @media only screen and (max-width:620px) {{
+    .main-table {{
+      width:100% !important;
+      min-width:0 !important;
+      table-layout: fixed !important;
+    }}
+    .content-cell {{
+      padding:18px 14px !important;
+      width:100% !important;
+      box-sizing: border-box !important;
+    }}
+    .article-title {{
+      font-size:16px !important;
+    }}
+    .article-content {{
+      padding:14px !important;
+      font-size:13px !important;
+      word-break: break-word !important;
+    }}
   }}
 </style>
 </head>
@@ -355,12 +376,12 @@ def build_email_html(articles, now):
        cellspacing="0"
        style="max-width:600px;width:100%;border-radius:12px;overflow:hidden;
               box-shadow:0 4px 6px -1px rgba(0,0,0,.1),0 2px 4px -1px rgba(0,0,0,.06);
-              background:#fff;">
+              background:#fff;table-layout:fixed;">
   <!-- HEADER -->
   <tr>
     <td style="background:linear-gradient(135deg,#0F172A 0%,#1e293b 50%,#0F172A 100%);
                padding:30px 28px;text-align:center;">
-      <h1 style="margin:0;font-size:22px;font-weight:700;color:#fff;letter-spacing:1px;">
+      <h1 style="margin:0;font-size:30px;font-weight:700;color:#fff;letter-spacing:1px;">
         🌿 策略研究
       </h1>
     </td>
