@@ -1,3 +1,2 @@
 playwright
-requests
-pytz
+aiohttp
