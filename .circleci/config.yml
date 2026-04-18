@@ -1,0 +1,30 @@
+version: 2.1
+
+parameters:
+  em_newsletter:
+    type: boolean
+    default: false
+
+jobs:
+  send-report:
+    docker:
+    - image: cimg/python:3.12
+    resource_class: medium
+    
+    steps:
+    - checkout
+    - run:
+        name: Install dependencies
+        command: |
+          pip install -r requirements.txt
+          playwright install chromium
+          playwright install-deps chromium
+    - run:
+        name: Fetch & send report
+        command: python main.py
+
+workflows:
+  Strategy_Report:
+    when: << pipeline.parameters.em_newsletter >>
+    jobs:
+    - send-report
