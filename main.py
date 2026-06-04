@@ -383,7 +383,7 @@ def build_email_html(articles, now):
       }}
       .article-content {{
         padding:14px !important;
-        font-size:13px !important;
+        font-size:14px !important;
       }}
     }}
   </style>
