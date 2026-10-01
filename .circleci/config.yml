@@ -21,7 +21,7 @@ jobs:
           playwright install-deps chromium
     - run:
         name: Fetch & send report
-        command: python main.py
+        command: timeout --kill-after=15s 3m python -u main.py
 
 workflows:
   Strategy_Report:
