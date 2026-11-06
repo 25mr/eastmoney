@@ -8,23 +8,47 @@ parameters:
 jobs:
   send-report:
     docker:
-    - image: cimg/python:3.14
-    resource_class: medium
-    
+      - image: cimg/python:3.15
+    resource_class: small
+
     steps:
-    - checkout
-    - run:
-        name: Install dependencies
-        command: |
-          pip install -r requirements.txt
-          playwright install chromium
-          playwright install-deps chromium
-    - run:
-        name: Fetch & send report
-        command: timeout --kill-after=15s 3m python -u main.py
+      - checkout
+
+      - restore_cache:
+          keys:
+            - v1-pip-{{ arch }}-{{ checksum "requirements.txt" }}
+            - v1-pip-{{ arch }}-
+
+      - restore_cache:
+          keys:
+            - v1-pw-{{ arch }}-{{ checksum "requirements.txt" }}
+            - v1-pw-{{ arch }}-
+
+      - run:
+          name: Install dependencies
+          command: pip install -r requirements.txt
+
+      - run:
+          name: Install Chromium (with system deps)
+          command: playwright install --with-deps chromium
+
+      - save_cache:
+          key: v1-pip-{{ arch }}-{{ checksum "requirements.txt" }}
+          paths:
+            - ~/.cache/pip
+
+      - save_cache:
+          key: v1-pw-{{ arch }}-{{ checksum "requirements.txt" }}
+          paths:
+            - ~/.cache/ms-playwright
+
+      - run:
+          name: Fetch & send report
+          command: timeout --signal=TERM --kill-after=30s 5m python main.py
+          no_output_timeout: 5m
 
 workflows:
   Strategy_Report:
     when: << pipeline.parameters.em_newsletter >>
     jobs:
-    - send-report
+      - send-report
